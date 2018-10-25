@@ -3,9 +3,8 @@ library("curl")
 library("igraph")
 library("ggplot2")
 
-corpora <- "ger"
-## plays_to_remove <- list("blok-balaganchik")
-##, "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
+corpora <- "rus"
+## plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
 
 ## Downloading plays
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpora))
@@ -109,10 +108,10 @@ distribution <- lapply(number_of_nodes, as.data.frame)
 fit <- lapply(distribution, function(x) lm(log(as.numeric(x$Freq)) ~ log(as.numeric(x$Var1))))
 df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
 
-## plot for help
-ggplot(data = distribution[[390]], aes(x = as.numeric(Var1), y = as.numeric(Freq)))+ 
+## additional plot for lermontov-maskarad
+ggplot(data = distribution[[46]], aes(x = as.numeric(Var1), y = as.numeric(Freq)))+ 
   geom_point(size = 3) + 
-  geom_smooth(method = "lm", formula=y~log(x))+
+  geom_smooth(method = "lm", formula=log(y)~log(x))+
   labs(x="Node degree", y = "Number of nodes")
 
 
