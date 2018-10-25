@@ -2,6 +2,7 @@ library("jsonlite")
 library("curl")
 library("igraph")
 library("ggplot2")
+library("parallel")
 
 corpora <- "rus"
 ## plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
@@ -10,7 +11,7 @@ corpora <- "rus"
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpora))
 sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
 ## sorted_ids <- sorted_ids[sorted_ids != plays_to_remove]  ## removing of plays which do not represent social interactions
-plays <- lapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
+plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 
 ## Remove 'Type' and 'Weight' variables
 del_vars <- function(play){
@@ -18,14 +19,14 @@ del_vars <- function(play){
   play$Weight <- NULL
   return (play)
 }
-plays <- lapply(plays, del_vars)
+plays <- mclapply(plays, del_vars)
 
 metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/metadata.csv"), stringsAsFactors = F)
 
 ## metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
 
 ## Creating graphs of plays
-graphs_of_plays <- lapply(plays, function(x) graph_from_data_frame(x, directed = F))
+graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
 
 CC <- sapply(graphs_of_plays, transitivity)
 APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
@@ -99,6 +100,7 @@ plot2
 ## Comparison of R-squared for power law ##
 
 ## preprocessing
+
 degree_dist <- lapply(graphs_of_plays, function(x) degree(x, v = V(x), loops = FALSE, normalized = FALSE))
 degree_dist_v <- lapply(degree_dist, as.vector)
 number_of_nodes <- lapply(degree_dist_v, table)
@@ -113,11 +115,4 @@ ggplot(data = distribution[[46]], aes(x = as.numeric(Var1), y = as.numeric(Freq)
   geom_point(size = 3) + 
   geom_smooth(method = "lm", formula=log(y)~log(x))+
   labs(x="Node degree", y = "Number of nodes")
-
-
-
-
-
-
-
 
