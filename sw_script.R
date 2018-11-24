@@ -22,7 +22,7 @@ del_vars <- function(play){
 plays <- mclapply(plays, del_vars)
 
 metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/metadata.csv"), stringsAsFactors = F)
-
+metadata <- metadata[order(metadata$name),]
 ## metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
 
 ## Creating graphs of plays
@@ -110,9 +110,9 @@ distribution <- lapply(number_of_nodes, as.data.frame)
 fit <- lapply(distribution, function(x) lm(log(as.numeric(x$Freq)) ~ log(as.numeric(x$Var1))))
 df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
 
-## additional plot for lermontov-maskarad
-ggplot(data = distribution[[46]], aes(x = as.numeric(Var1), y = as.numeric(Freq)))+ 
-  geom_point(size = 3) + 
-  geom_smooth(method = "lm", formula=log(y)~log(x))+
-  labs(x="Node degree", y = "Number of nodes")
+## additional plot for play with PLAY_NUMBER from df
+##ggplot(data = distribution[[PLAY_NUMBER]], aes(x = as.numeric(Var1), y = as.numeric(Freq)))+ 
+##  geom_point(size = 3) + 
+##  geom_smooth(method = "lm", formula=log(y)~log(x))+
+##  labs(x="Node degree", y = "Number of nodes")
 
