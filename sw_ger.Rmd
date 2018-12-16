@@ -15,6 +15,10 @@ library("ggplot2")
 library("parallel")
 ```
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, messages=FALSE)
+```
+
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
@@ -28,12 +32,10 @@ corpusname <- "rus"
 
 Downloading CSV files of plays
 ```{r}
-corpusname
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
 sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
-plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", 
+plays <- lapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", 
                   corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
-plays[[1]]
 ```
 
 Removing of 'Type' and 'Weight' variables
@@ -44,7 +46,6 @@ del_vars <- function(play){
   return (play)
 }
 plays <- mclapply(plays, del_vars)
-plays[[1]]
 ```
   
 Downloading metadata
@@ -57,10 +58,33 @@ metadata <- metadata[order(metadata$name),]
 Creating graphs of plays
 ```{r}
 graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
-str(graphs_of_plays)
-#CC <- sapply(graphs_of_plays, transitivity)
-
 ```
+
+Calculations of clustering coefficient and average path length
+```{r}
+CC <- sapply(graphs_of_plays, transitivity)
+APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
+
+df <- subset(metadata, select = c(name, year, numOfSpeakers) )
+df$Clustering_coefficient = CC
+df$Average_path_length = APL
+```
+
+Function generates random graphs and calculates metrics (CC and APL) for them
+```{r}
+randomize_graph <- function(graph){
+  random_graphs=list(1000)
+  random_graphs <- lapply(random_graphs, function(x) 
+                          x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
+  mile_CC <- sapply(random_graphs, transitivity)
+  mile_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
+  results <- list()
+  results$CC_rand <- mean(mile_CC)
+  results$APL_rand <- mean(mile_APL)
+  return(results)
+}
+```
+
   
 ## Including Plots
 
