@@ -4,7 +4,7 @@ library("igraph")
 library("ggplot2")
 library("parallel")
 
-corpora <- "rus"
+corpora <- "ger"
 ## plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
 
 ## Downloading plays
@@ -22,7 +22,7 @@ del_vars <- function(play){
 plays <- mclapply(plays, del_vars)
 
 metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/metadata.csv"), stringsAsFactors = F)
-
+metadata <- metadata[order(metadata$name),]
 ## metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
 
 ## Creating graphs of plays
@@ -67,8 +67,33 @@ APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 df$crit_1 <- ifelse(df$CC_dev>=CC_border, TRUE, FALSE)
 df$crit_2 <- ifelse((df$crit_1 == TRUE) & (df$APL_dev >= APL_border_min) & (df$APL_dev<=APL_border_max), TRUE, FALSE)
 
+## Comparison of R-squared for power law ##
+
+## preprocessing
+
+degree_dist <- lapply(graphs_of_plays, function(x) degree(x, v = V(x), loops = FALSE, normalized = FALSE))
+degree_dist_v <- lapply(degree_dist, as.vector)
+number_of_nodes <- lapply(degree_dist_v, table)
+distribution <- lapply(number_of_nodes, as.data.frame)
+
+num_type <- function(x){
+  x$Var1 <- as.numeric(as.character(x$Var1))
+  x$Freq <- as.numeric(x$Freq)
+  names(x) <- c("Node_degree", "Num_of_nodes")
+  x
+}
+
+distribution <- lapply(distribution, num_type)
+
+## regressions
+fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
+df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+
 ## The dataframe with small-world networks
 small_worlds <- na.omit(df[df$crit_2 == TRUE,])
+
+## The list of small-world graphs
+## small_worlds_g <- lapply(as.numeric(rownames(small_worlds)), function(x) graphs_of_plays[[x]])
 
 
 ## PLOTS ##
@@ -86,7 +111,7 @@ plot1
 
 theme_set(theme_gray(base_size = 15)) ## size of axis font
 plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev, 
-                                   fill = crit_1, shape = crit_2, color = crit_1))+
+                                 fill = crit_1, shape = crit_2, color = crit_1))+
   geom_point(size = 6)+
   scale_shape_manual(values=c(21, 22), name = "Criterion 2")+
   scale_color_manual(values=c("slateblue3", "indianred3"), name = "Criterion 1")+
@@ -97,22 +122,20 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
 plot2
 
 
-## Comparison of R-squared for power law ##
 
-## preprocessing
 
-degree_dist <- lapply(graphs_of_plays, function(x) degree(x, v = V(x), loops = FALSE, normalized = FALSE))
-degree_dist_v <- lapply(degree_dist, as.vector)
-number_of_nodes <- lapply(degree_dist_v, table)
-distribution <- lapply(number_of_nodes, as.data.frame)
 
-## regressions
-fit <- lapply(distribution, function(x) lm(log(as.numeric(x$Freq)) ~ log(as.numeric(x$Var1))))
-df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+loglog <- lm(log(distribution[[417]]$Num_of_nodes) ~ log(distribution[[417]]$Node_degree))
+loglog_df <- data.frame(x = distribution[[417]]$Node_degree, y = exp(fitted(loglog)))
 
-## additional plot for lermontov-maskarad
-ggplot(data = distribution[[46]], aes(x = as.numeric(Var1), y = as.numeric(Freq)))+ 
+ggplot(data = distribution[[417]], aes(x = Node_degree, y = Num_of_nodes))+ 
   geom_point(size = 3) + 
-  geom_smooth(method = "lm", formula=log(y)~log(x))+
+  geom_line(data = loglog_df, aes(x = x, y = y), linetype = 2, color="blue")+
+  labs(x="Node degree", y = "Number of nodes")
+
+## additional plot for a play with PLAY_NUMBER from df
+ggplot(data = distribution[[417]], aes(x = as.numeric(as.character(Var1)), y = as.numeric(Freq)))+ 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", formula='log(y)~log(x)')+
   labs(x="Node degree", y = "Number of nodes")
 
