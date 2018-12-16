@@ -1,0 +1,73 @@
+---
+title: "Small worlds in German drama corpus"
+author: "Ustinova Eugenia"
+date: "December 15, 2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("knitr")
+library("jsonlite")
+library("curl")
+library("igraph")
+library("ggplot2")
+library("parallel")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+Choice of the corpus
+```{r}
+corpusname <- "rus"
+```
+
+Downloading CSV files of plays
+```{r}
+corpusname
+list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
+sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
+plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", 
+                  corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
+plays[[1]]
+```
+
+Removing of 'Type' and 'Weight' variables
+```{r}
+del_vars <- function(play){
+  play$Type <- NULL
+  play$Weight <- NULL
+  return (play)
+}
+plays <- mclapply(plays, del_vars)
+plays[[1]]
+```
+  
+Downloading metadata
+```{r}
+metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/metadata.csv"),
+                     stringsAsFactors = F)
+metadata <- metadata[order(metadata$name),]
+```
+
+Creating graphs of plays
+```{r}
+graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
+str(graphs_of_plays)
+#CC <- sapply(graphs_of_plays, transitivity)
+
+```
+  
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
