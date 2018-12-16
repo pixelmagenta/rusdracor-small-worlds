@@ -4,14 +4,14 @@ library("igraph")
 library("ggplot2")
 library("parallel")
 
-corpora <- "ger"
+corpusname <- "rus"
 ## plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
 
 ## Downloading plays
-list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpora))
+list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
 sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
 ## sorted_ids <- sorted_ids[sorted_ids != plays_to_remove]  ## removing of plays which do not represent social interactions
-plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
+plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 
 ## Remove 'Type' and 'Weight' variables
 del_vars <- function(play){
@@ -21,13 +21,15 @@ del_vars <- function(play){
 }
 plays <- mclapply(plays, del_vars)
 
-metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpora, "/metadata.csv"), stringsAsFactors = F)
+metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/metadata.csv"), stringsAsFactors = F)
 metadata <- metadata[order(metadata$name),]
 ## metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
 
 ## Creating graphs of plays
 graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
 
+## Calculations of clustering coefficient and average path length
+str(graphs_of_plays)
 CC <- sapply(graphs_of_plays, transitivity)
 APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
 
@@ -35,7 +37,7 @@ df <- subset(metadata, select = c(name, year, numOfSpeakers) )
 df$Clustering_coefficient = CC
 df$Average_path_length = APL
 
-## Function for creating random graphs and calculating metrics for them
+## Function generates random graphs and calculates metrics (CC and APL) for them
 randomize_graph <- function(graph){
   random_graphs=list(1000)
   random_graphs <- lapply(random_graphs, function(x) x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
@@ -121,8 +123,7 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
   geom_text(aes(label=ifelse(numOfSpeakers>47,as.character(name),'')),hjust=0.5,vjust=1.5, color="black", size=4)
 plot2
 
-
-
+node_degree_distribution
 
 
 loglog <- lm(log(distribution[[417]]$Num_of_nodes) ~ log(distribution[[417]]$Node_degree))
@@ -138,4 +139,3 @@ ggplot(data = distribution[[417]], aes(x = as.numeric(as.character(Var1)), y = a
   geom_point(size = 3) + 
   geom_smooth(method = "lm", formula='log(y)~log(x)')+
   labs(x="Node degree", y = "Number of nodes")
-
