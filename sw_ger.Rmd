@@ -180,7 +180,7 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
 plot2
 ```
 
-The plot for Goethe "Götz von Berlichingen mit der eisernen Hand" -- the play with the highest R²=`r df["goethe-goetz-von-berlichingen-mit-der-eisernen-hand"==df$name, ]$Rsqrt`.
+The plot for Voss "Faust" -- the play with the highest R²=`r df["voss-faust"==df$name, ]$Rsqrt`.
 
 ```{r}
 power_law_plot <- function(name_of_play){
@@ -194,5 +194,10 @@ power_law_plot <- function(name_of_play){
     labs(x="Node degree", y = "Number of nodes")
 }
 
+power_law_plot("voss-faust")
+```
+
+The plot for Goethe "Götz von Berlichingen mit der eisernen Hand", R²=`r df["goethe-goetz-von-berlichingen-mit-der-eisernen-hand"==df$name, ]$Rsqrt`.
+```{r}
 power_law_plot("goethe-goetz-von-berlichingen-mit-der-eisernen-hand")
 ```
