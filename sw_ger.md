@@ -66,6 +66,7 @@ This function generates random graphs and calculates metrics (CC and
 APL) for them
 
 ``` r
+set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
   random_graphs <- lapply(random_graphs, function(x) 
@@ -102,9 +103,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 3.8673199.
-Average path length deviation must be in the interval \[0.871043;
-1.159428\].
+Clustering coefficient deviation must be greater or equal to 3.7992528.
+Average path length deviation must be in the interval \[0.8689946;
+1.1611607\].
 
 Applying criteria
 
@@ -156,19 +157,20 @@ kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 
 |     | name                                                | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrt |
 | --- | :-------------------------------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
-| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.493988 | 0.9285573 | 0.0727248 |
-| 50  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 6.388308 | 1.1087472 | 0.1711228 |
-| 87  | gleich-der-eheteufel-auf-reisen                     | 1821 |            51 | 0.6291301 | 2.102842 | 4.396421 | 0.9477282 | 0.2813269 |
-| 99  | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.485809 | 0.9427355 | 0.0073215 |
-| 101 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 6.159037 | 1.0141090 | 0.3357111 |
-| 116 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.998199 | 0.9706550 | 0.0215549 |
-| 242 | lassalle-franz-von-sickingen                        | 1859 |            72 | 0.5580662 | 2.515649 | 4.474495 | 1.1494458 | 0.2478197 |
-| 354 | schikaneder-die-zauberfloete                        | 1791 |            50 | 0.5170940 | 2.375000 | 4.067073 | 1.0783784 | 0.2742408 |
-| 393 | soden-doktor-faust                                  | 1797 |            62 | 0.5741016 | 1.873612 | 3.876299 | 0.9082287 | 0.1925088 |
-| 395 | sorge-der-sieg-des-christos                         | 1924 |            79 | 0.8317064 | 1.886076 | 5.573688 | 0.9683512 | 0.0198135 |
-| 414 | tieck-prinz-zerbino                                 | 1799 |           148 | 0.6883507 | 2.282266 | 5.381373 | 1.1498122 | 0.1343845 |
-| 419 | vischer-faust                                       | 1862 |            94 | 0.5978947 | 1.972317 | 4.002465 | 1.0065382 | 0.3172817 |
-| 420 | voss-faust                                          | 1823 |            72 | 0.4442793 | 2.180214 | 7.478702 | 0.8744713 | 0.4609287 |
+| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.863235 | 0.9310104 | 0.0727248 |
+| 24  | beer-struensee                                      | 1828 |            56 | 0.6764706 | 2.645914 | 4.307189 | 1.1579165 | 0.3483074 |
+| 50  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 7.595321 | 1.1137145 | 0.1711228 |
+| 87  | gleich-der-eheteufel-auf-reisen                     | 1821 |            51 | 0.6291301 | 2.102842 | 4.682180 | 0.9371280 | 0.2813269 |
+| 99  | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.459539 | 0.9443303 | 0.0073215 |
+| 101 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 5.210718 | 0.9991548 | 0.3357111 |
+| 116 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.592816 | 0.9669291 | 0.0215549 |
+| 217 | kleist-die-hermannsschlacht                         | 1808 |            84 | 0.5906385 | 2.583477 | 5.392310 | 1.1549115 | 0.2373926 |
+| 218 | kleist-penthesilea                                  | 1808 |            84 | 0.4966041 | 2.283132 | 3.969954 | 1.1316650 | 0.2988157 |
+| 242 | lassalle-franz-von-sickingen                        | 1859 |            72 | 0.5580662 | 2.515649 | 4.528213 | 1.1539842 | 0.2478197 |
+| 395 | sorge-der-sieg-des-christos                         | 1924 |            79 | 0.8317064 | 1.886076 | 5.281970 | 0.9678548 | 0.0198135 |
+| 414 | tieck-prinz-zerbino                                 | 1799 |           148 | 0.6883507 | 2.282266 | 5.578848 | 1.1480874 | 0.1343845 |
+| 419 | vischer-faust                                       | 1862 |            94 | 0.5978947 | 1.972317 | 4.020587 | 1.0110238 | 0.3172817 |
+| 420 | voss-faust                                          | 1823 |            72 | 0.4442793 | 2.180214 | 5.304426 | 0.8729788 | 0.4609287 |
 
 ## Plots
 
@@ -202,8 +204,7 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
   scale_fill_manual(values=c("slateblue1", "indianred1"), name = "Criterion 1")+
   labs(x="Number of characters", y = "Clustering coefficient deviation")+
   coord_cartesian(xlim = c(0, max(df$numOfSpeakers)+12))+
-  geom_text(aes(label=ifelse(numOfSpeakers>75,as.character(name),'')), 
-            hjust=0.5, vjust=1.5, color="black", size=4)
+  geom_text(aes(label=ifelse(numOfSpeakers>75,as.character(name),'')), hjust=0.5, vjust=1.5, color="black", size=4)
 plot2
 ```
 
