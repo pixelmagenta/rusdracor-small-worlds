@@ -210,8 +210,7 @@ plot2
 
 ![](sw_ger_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
-The plot for Goethe “Götz von Berlichingen mit der eisernen Hand” – the
-play with the highest R²=0.3357111.
+The plot for Voss “Faust” – the play with the highest R²=0.4609287.
 
 ``` r
 power_law_plot <- function(name_of_play){
@@ -225,7 +224,16 @@ power_law_plot <- function(name_of_play){
     labs(x="Node degree", y = "Number of nodes")
 }
 
-power_law_plot("goethe-goetz-von-berlichingen-mit-der-eisernen-hand")
+power_law_plot("voss-faust")
 ```
 
 ![](sw_ger_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+The plot for Goethe “Götz von Berlichingen mit der eisernen Hand”,
+R²=0.3357111.
+
+``` r
+power_law_plot("goethe-goetz-von-berlichingen-mit-der-eisernen-hand")
+```
+
+![](sw_ger_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
