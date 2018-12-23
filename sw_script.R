@@ -4,13 +4,13 @@ library("igraph")
 library("ggplot2")
 library("parallel")
 
-corpusname <- "rus"
-## plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
+corpusname <- "ger"
+##plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
 
 ## Downloading plays
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
 sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
-## sorted_ids <- sorted_ids[sorted_ids != plays_to_remove]  ## removing of plays which do not represent social interactions
+##sorted_ids <- sorted_ids[sorted_ids != plays_to_remove]  ## removing of plays which do not represent social interactions
 plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 
 ## Remove 'Type' and 'Weight' variables
@@ -23,40 +23,40 @@ plays <- mclapply(plays, del_vars)
 
 metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/metadata.csv"), stringsAsFactors = F)
 metadata <- metadata[order(metadata$name),]
-## metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
+##metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
 
 ## Creating graphs of plays
 graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
 
 ## Calculations of clustering coefficient and average path length
-str(graphs_of_plays)
 CC <- sapply(graphs_of_plays, transitivity)
 APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
 
 df <- subset(metadata, select = c(name, year, numOfSpeakers) )
-df$Clustering_coefficient = CC
-df$Average_path_length = APL
+df$CC = CC
+df$APL = APL
 
 ## Function generates random graphs and calculates metrics (CC and APL) for them
+set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
   random_graphs <- lapply(random_graphs, function(x) x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
-  mile_CC <- sapply(random_graphs, transitivity)
-  mile_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
+  kilo_CC <- sapply(random_graphs, transitivity)
+  kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
-  results$CC_rand <- mean(mile_CC)
-  results$APL_rand <- mean(mile_APL)
+  results$CC_rand <- mean(kilo_CC)
+  results$APL_rand <- mean(kilo_APL)
   return(results)
 }
 
 metrics_for_rand_graphs <- lapply(graphs_of_plays, randomize_graph)
 matrix_metrics <- t(sapply(metrics_for_rand_graphs, unlist))
 
-df$Clustering_coefficient_rand=matrix_metrics[,1]
-df$Average_path_length_rand=matrix_metrics[,2]
+df$CC_rand=matrix_metrics[,1]
+df$APL_rand=matrix_metrics[,2]
 
-df <- transform(df, CC_dev = Clustering_coefficient / Clustering_coefficient_rand )
-df <- transform(df, APL_dev = Average_path_length / Average_path_length_rand )
+df <- transform(df, CC_dev = CC / CC_rand )
+df <- transform(df, APL_dev = APL / APL_rand )
 
 is.na(df) <- do.call(cbind,lapply(df, is.infinite))
 
@@ -119,23 +119,20 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
   scale_color_manual(values=c("slateblue3", "indianred3"), name = "Criterion 1")+
   scale_fill_manual(values=c("slateblue1", "indianred1"), name = "Criterion 1")+
   labs(x="Number of characters", y = "Clustering coefficient deviation")+
-  coord_cartesian(xlim = c(0, 105))+
-  geom_text(aes(label=ifelse(numOfSpeakers>47,as.character(name),'')),hjust=0.5,vjust=1.5, color="black", size=4)
+  coord_cartesian(xlim = c(0, max(df$numOfSpeakers)+12))+
+  geom_text(aes(label=ifelse(numOfSpeakers>75,as.character(name),'')),hjust=0.5,vjust=1.5, color="black", size=4)
 plot2
 
-node_degree_distribution
 
+power_law_plot <- function(name_of_play){
+  id <- which(name_of_play == df$name)[[1]]
+  loglog <- lm(log(distribution[[id]]$Num_of_nodes) ~ log(distribution[[id]]$Node_degree))
+  loglog_df <- data.frame(x = distribution[[id]]$Node_degree, y = exp(fitted(loglog)))
+  
+  ggplot(data = distribution[[id]], aes(x = Node_degree, y = Num_of_nodes))+ 
+    geom_point(size = 3) + 
+    geom_line(data = loglog_df, aes(x = x, y = y), linetype = 2, color="blue", size = 1)+
+    labs(x="Node degree", y = "Number of nodes")
+}
 
-loglog <- lm(log(distribution[[417]]$Num_of_nodes) ~ log(distribution[[417]]$Node_degree))
-loglog_df <- data.frame(x = distribution[[417]]$Node_degree, y = exp(fitted(loglog)))
-
-ggplot(data = distribution[[417]], aes(x = Node_degree, y = Num_of_nodes))+ 
-  geom_point(size = 3) + 
-  geom_line(data = loglog_df, aes(x = x, y = y), linetype = 2, color="blue")+
-  labs(x="Node degree", y = "Number of nodes")
-
-## additional plot for a play with PLAY_NUMBER from df
-ggplot(data = distribution[[417]], aes(x = as.numeric(as.character(Var1)), y = as.numeric(Freq)))+ 
-  geom_point(size = 3) + 
-  geom_smooth(method = "lm", formula='log(y)~log(x)')+
-  labs(x="Node degree", y = "Number of nodes")
+power_law_plot("goethe-goetz-von-berlichingen-mit-der-eisernen-hand")
