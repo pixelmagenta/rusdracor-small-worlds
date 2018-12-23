@@ -71,6 +71,7 @@ df$APL = APL
 
 This function generates random graphs and calculates metrics (CC and APL) for them
 ```{r}
+set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
   random_graphs <- lapply(random_graphs, function(x) 
@@ -175,8 +176,7 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
   scale_fill_manual(values=c("slateblue1", "indianred1"), name = "Criterion 1")+
   labs(x="Number of characters", y = "Clustering coefficient deviation")+
   coord_cartesian(xlim = c(0, max(df$numOfSpeakers)+12))+
-  geom_text(aes(label=ifelse(numOfSpeakers>75,as.character(name),'')), 
-            hjust=0.5, vjust=1.5, color="black", size=4)
+  geom_text(aes(label=ifelse(numOfSpeakers>75,as.character(name),'')), hjust=0.5, vjust=1.5, color="black", size=4)
 plot2
 ```
 
