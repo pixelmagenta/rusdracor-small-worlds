@@ -4,14 +4,26 @@ library("igraph")
 library("ggplot2")
 library("parallel")
 
-corpusname <- "ger"
+corpusname <- "rus"
 ##plays_to_remove <- list("blok-balaganchik", "blok-korol-na-ploschadi", "blok-neznakomka", "gogol-teatralnyi-razezd")
 
 ## Downloading plays
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
 sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
 ##sorted_ids <- sorted_ids[sorted_ids != plays_to_remove]  ## removing of plays which do not represent social interactions
-plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
+
+downloader <- function(playname){
+  if (file.exists(paste0("csv/", playname, ".csv"))) {
+  
+  } else {
+  download.file(paste0("https://dracor.org/api/corpora/", corpusname, "/play/", playname, "/networkdata/csv"), paste0("csv/", playname, ".csv"))
+  }
+  read.csv(paste0("csv/", playname, ".csv"), stringsAsFactors = F)
+}
+
+plays <- lapply(sorted_ids, downloader)
+
+#plays <- mclapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 
 ## Remove 'Type' and 'Weight' variables
 del_vars <- function(play){
@@ -40,7 +52,10 @@ df$APL = APL
 set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
-  random_graphs <- lapply(random_graphs, function(x) x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
+  for (i in 1:1000){
+    random_graphs[i] <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
+  }
+  ##  random_graphs <- lapply(random_graphs, function(x) x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
   kilo_CC <- sapply(random_graphs, transitivity)
   kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
@@ -89,7 +104,7 @@ distribution <- lapply(distribution, num_type)
 
 ## regressions
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
-df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+df$Rsq <- sapply (fit, function(x) summary(x)$r.squared)
 
 ## The dataframe with small-world networks
 small_worlds <- na.omit(df[df$crit_2 == TRUE,])
