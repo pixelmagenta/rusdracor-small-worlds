@@ -38,7 +38,7 @@ metadata <- metadata[order(metadata$name),]
 ##metadata <- metadata[metadata$name != plays_to_remove,] ## removing of plays which do not represent social interactions
 
 ## Creating graphs of plays
-graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
+graphs_of_plays <- lapply(plays, function(x) graph_from_data_frame(x, directed = F))
 
 ## Calculations of clustering coefficient and average path length
 CC <- sapply(graphs_of_plays, transitivity)
@@ -53,9 +53,9 @@ set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
   for (i in 1:1000){
-    random_graphs[i] <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
+    random_graphs[[i]] <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
   }
-  ##  random_graphs <- lapply(random_graphs, function(x) x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
+  ## random_graphs <- lapply(random_graphs, function(x) x <- sample_gnm(gorder(graph), gsize(graph), directed = FALSE, loops = FALSE))
   kilo_CC <- sapply(random_graphs, transitivity)
   kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
@@ -104,7 +104,7 @@ distribution <- lapply(distribution, num_type)
 
 ## regressions
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
-df$Rsq <- sapply (fit, function(x) summary(x)$r.squared)
+df$Rsqrd <- sapply (fit, function(x) summary(x)$r.squared)
 
 ## The dataframe with small-world networks
 small_worlds <- na.omit(df[df$crit_2 == TRUE,])
