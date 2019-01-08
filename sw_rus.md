@@ -66,11 +66,11 @@ This function generates random graphs and calculates metrics (CC and
 APL) for them
 
 ``` r
-set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
-  random_graphs <- lapply(random_graphs, function(x) 
-                          x <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F))
+  for (i in 1:1000){
+    random_graphs[[i]] = sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
+  }
   kilo_CC <- sapply(random_graphs, transitivity)
   kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
@@ -103,9 +103,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 4.5268447.
-Average path length deviation must be in the interval \[0.8408552;
-1.1669531\].
+Clustering coefficient deviation must be greater or equal to 4.3514145.
+Average path length deviation must be in the interval \[0.844939;
+1.1641307\].
 
 Applying criteria
 
@@ -143,7 +143,7 @@ of R² (coefficient of determination) for each model
 
 ``` r
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
-df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+df$Rsqrd <- sapply (fit, function(x) summary(x)$r.squared)
 ```
 
 The dataframe with networks, which satisfy two first criteria and their
@@ -155,10 +155,10 @@ small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, 
 kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 ```
 
-|     | name                          | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrt |
-| --- | :---------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
-| 82  | mayakovsky-klop               | 1929 |            98 | 0.8423069 | 1.826874 | 4.929984 | 0.9686673 | 0.0634534 |
-| 127 | tolstoy-smert-ioanna-groznogo | 1866 |            70 | 0.6382685 | 2.175966 | 4.689689 | 1.0389397 | 0.2885855 |
+|     | name                          | year | numOfSpeakers |        CC |      APL |  CC\_dev | APL\_dev |     Rsqrd |
+| --- | :---------------------------- | ---: | ------------: | --------: | -------: | -------: | -------: | --------: |
+| 82  | mayakovsky-klop               | 1929 |            98 | 0.8423069 | 1.826874 | 5.116228 | 0.964792 | 0.0634534 |
+| 127 | tolstoy-smert-ioanna-groznogo | 1866 |            70 | 0.6382685 | 2.175966 | 4.665023 | 1.037319 | 0.2885855 |
 
 ## Plots
 
