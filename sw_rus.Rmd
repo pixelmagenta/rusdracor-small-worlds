@@ -14,6 +14,7 @@ library("curl")
 library("igraph")
 library("ggplot2")
 library("parallel")
+set.seed(42)
 ```
 
 ```{r global_options, include=FALSE}
@@ -71,11 +72,11 @@ df$APL = APL
 
 This function generates random graphs and calculates metrics (CC and APL) for them
 ```{r}
-set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
-  random_graphs <- lapply(random_graphs, function(x) 
-                          x <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F))
+  for (i in 1:1000){
+    random_graphs[[i]] = sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
+  }
   kilo_CC <- sapply(random_graphs, transitivity)
   kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
@@ -139,7 +140,7 @@ distribution <- lapply(distribution, num_type)
 Fitting logarithms of distributions to linear regression and calculating of R² (coefficient of determination) for each model (play).
 ```{r}
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
-df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+df$Rsqrd <- sapply (fit, function(x) summary(x)$r.squared)
 ```
 
 The dataframe with networks, which satisfy two first criteria and their R².
@@ -180,7 +181,7 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
 plot2
 ```
 
-The plot for Tolstoy "Smert Ioanna Groznogo" -- the play with the highest R²=`r df["tolstoy-smert-ioanna-groznogo"==df$name, ]$Rsqrt`.
+The plot for Tolstoy "Smert Ioanna Groznogo" -- the play with the highest R²=`r df["tolstoy-smert-ioanna-groznogo"==df$name, ]$Rsqrd`.
 
 ```{r}
 power_law_plot <- function(name_of_play){
