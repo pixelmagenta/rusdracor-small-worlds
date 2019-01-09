@@ -14,6 +14,7 @@ library("curl")
 library("igraph")
 library("ggplot2")
 library("parallel")
+set.seed(42)
 ```
 
 ```{r global_options, include=FALSE}
@@ -71,11 +72,11 @@ df$APL = APL
 
 This function generates random graphs and calculates metrics (CC and APL) for them
 ```{r}
-set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
-  random_graphs <- lapply(random_graphs, function(x) 
-                          x <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F))
+  for (i in 1:1000){
+    random_graphs[[i]] = sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
+  }
   kilo_CC <- sapply(random_graphs, transitivity)
   kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
@@ -139,13 +140,13 @@ distribution <- lapply(distribution, num_type)
 Fitting logarithms of distributions to linear regression and calculating of R² (coefficient of determination) for each model (play).
 ```{r}
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
-df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+df$Rsqrd <- sapply (fit, function(x) summary(x)$r.squared)
 ```
 
 The dataframe with networks, which satisfy two first criteria and their R².
 ```{r}
 small_worlds <- na.omit(df[df$crit_2 == TRUE,])
-small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand))
+## УДАЛИТЬ small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand))
 kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 ```
 
@@ -180,8 +181,6 @@ plot2 <- ggplot(na.omit(df), aes(x = numOfSpeakers, y = CC_dev,
 plot2
 ```
 
-The plot for Voss "Faust" -- the play with the highest R²=`r df["voss-faust"==df$name, ]$Rsqrt`.
-
 ```{r}
 power_law_plot <- function(name_of_play){
   id <- which(name_of_play == df$name)[[1]]
@@ -193,11 +192,9 @@ power_law_plot <- function(name_of_play){
     geom_line(data = loglog_df, aes(x = x, y = y), linetype = 2, color="blue", size = 1)+
     labs(x="Node degree", y = "Number of nodes")
 }
-
-power_law_plot("voss-faust")
 ```
 
-The plot for Goethe "Götz von Berlichingen mit der eisernen Hand", R²=`r df["goethe-goetz-von-berlichingen-mit-der-eisernen-hand"==df$name, ]$Rsqrt`.
+The plot for Goethe "Götz von Berlichingen mit der eisernen Hand", R²=`r df["goethe-goetz-von-berlichingen-mit-der-eisernen-hand"==df$name, ]$Rsqrd`.
 ```{r}
 power_law_plot("goethe-goetz-von-berlichingen-mit-der-eisernen-hand")
 ```
