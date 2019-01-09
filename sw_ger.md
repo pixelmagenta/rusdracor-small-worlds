@@ -66,11 +66,11 @@ This function generates random graphs and calculates metrics (CC and
 APL) for them
 
 ``` r
-set.seed(42)
 randomize_graph <- function(graph){
   random_graphs=list(1000)
-  random_graphs <- lapply(random_graphs, function(x) 
-                          x <- sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F))
+  for (i in 1:1000){
+    random_graphs[[i]] = sample_gnm(gorder(graph), gsize(graph), directed = F, loops = F)
+  }
   kilo_CC <- sapply(random_graphs, transitivity)
   kilo_APL <- sapply(random_graphs, function(x) mean_distance(x, directed=F))
   results <- list()
@@ -103,9 +103,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 3.7992528.
-Average path length deviation must be in the interval \[0.8689946;
-1.1611607\].
+Clustering coefficient deviation must be greater or equal to 3.7512023.
+Average path length deviation must be in the interval \[0.8726735;
+1.1563393\].
 
 Applying criteria
 
@@ -143,7 +143,7 @@ of R² (coefficient of determination) for each model
 
 ``` r
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
-df$Rsqrt <- sapply (fit, function(x) summary(x)$r.squared)
+df$Rsqrd <- sapply (fit, function(x) summary(x)$r.squared)
 ```
 
 The dataframe with networks, which satisfy two first criteria and their
@@ -151,26 +151,24 @@ R².
 
 ``` r
 small_worlds <- na.omit(df[df$crit_2 == TRUE,])
-small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand))
+## УДАЛИТЬ small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand))
 kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 ```
 
-|     | name                                                | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrt |
+|     | name                                                | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
 | --- | :-------------------------------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
-| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.863235 | 0.9310104 | 0.0727248 |
-| 24  | beer-struensee                                      | 1828 |            56 | 0.6764706 | 2.645914 | 4.307189 | 1.1579165 | 0.3483074 |
-| 50  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 7.595321 | 1.1137145 | 0.1711228 |
-| 87  | gleich-der-eheteufel-auf-reisen                     | 1821 |            51 | 0.6291301 | 2.102842 | 4.682180 | 0.9371280 | 0.2813269 |
-| 99  | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.459539 | 0.9443303 | 0.0073215 |
-| 101 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 5.210718 | 0.9991548 | 0.3357111 |
-| 116 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.592816 | 0.9669291 | 0.0215549 |
-| 217 | kleist-die-hermannsschlacht                         | 1808 |            84 | 0.5906385 | 2.583477 | 5.392310 | 1.1549115 | 0.2373926 |
-| 218 | kleist-penthesilea                                  | 1808 |            84 | 0.4966041 | 2.283132 | 3.969954 | 1.1316650 | 0.2988157 |
-| 242 | lassalle-franz-von-sickingen                        | 1859 |            72 | 0.5580662 | 2.515649 | 4.528213 | 1.1539842 | 0.2478197 |
-| 395 | sorge-der-sieg-des-christos                         | 1924 |            79 | 0.8317064 | 1.886076 | 5.281970 | 0.9678548 | 0.0198135 |
-| 414 | tieck-prinz-zerbino                                 | 1799 |           148 | 0.6883507 | 2.282266 | 5.578848 | 1.1480874 | 0.1343845 |
-| 419 | vischer-faust                                       | 1862 |            94 | 0.5978947 | 1.972317 | 4.020587 | 1.0110238 | 0.3172817 |
-| 420 | voss-faust                                          | 1823 |            72 | 0.4442793 | 2.180214 | 5.304426 | 0.8729788 | 0.4609287 |
+| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.475338 | 0.9272360 | 0.0727248 |
+| 50  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 6.710217 | 1.1122706 | 0.1711228 |
+| 87  | gleich-der-eheteufel-auf-reisen                     | 1821 |            51 | 0.6291301 | 2.102842 | 4.642326 | 0.9481004 | 0.2813269 |
+| 99  | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.650089 | 0.9437318 | 0.0073215 |
+| 101 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 5.287992 | 1.0060611 | 0.3357111 |
+| 116 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.954625 | 0.9665765 | 0.0215549 |
+| 202 | immermann-andreas-hofer                             | 1835 |            57 | 0.4882979 | 2.327057 | 4.020736 | 1.0236823 | 0.1562356 |
+| 242 | lassalle-franz-von-sickingen                        | 1859 |            72 | 0.5580662 | 2.515649 | 4.596229 | 1.1518624 | 0.2478197 |
+| 322 | raimund-die-unheilbringende-zauberkrone             | 1829 |            56 | 0.5918043 | 2.372727 | 3.824657 | 1.1477477 | 0.2491547 |
+| 393 | soden-doktor-faust                                  | 1797 |            62 | 0.5741016 | 1.873612 | 3.794598 | 0.9120821 | 0.1925088 |
+| 395 | sorge-der-sieg-des-christos                         | 1924 |            79 | 0.8317064 | 1.886076 | 5.219582 | 0.9641030 | 0.0198135 |
+| 419 | vischer-faust                                       | 1862 |            94 | 0.5978947 | 1.972317 | 3.991173 | 1.0096503 | 0.3172817 |
 
 ## Plots
 
@@ -210,8 +208,6 @@ plot2
 
 ![](sw_ger_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
-The plot for Voss “Faust” – the play with the highest R²=0.4609287.
-
 ``` r
 power_law_plot <- function(name_of_play){
   id <- which(name_of_play == df$name)[[1]]
@@ -223,11 +219,7 @@ power_law_plot <- function(name_of_play){
     geom_line(data = loglog_df, aes(x = x, y = y), linetype = 2, color="blue", size = 1)+
     labs(x="Node degree", y = "Number of nodes")
 }
-
-power_law_plot("voss-faust")
 ```
-
-![](sw_ger_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 The plot for Goethe “Götz von Berlichingen mit der eisernen Hand”,
 R²=0.3357111.
