@@ -1,7 +1,7 @@
 Small worlds in German drama corpus
 ================
 Ustinova Eugenia
-December 15, 2018
+June 10, 2019
 
 ## Preprocessing
 
@@ -11,8 +11,7 @@ Choice of the corpus
 corpusname <- "ger"
 ```
 
-Downloading CSV files of
-plays
+Downloading CSV files of plays
 
 ``` r
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
@@ -32,8 +31,7 @@ del_vars <- function(play){
 plays <- mclapply(plays, del_vars)
 ```
 
-Downloading
-metadata
+Downloading metadata
 
 ``` r
 metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/metadata.csv"),
@@ -41,8 +39,7 @@ metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/met
 metadata <- metadata[order(metadata$name),]
 ```
 
-Creating graphs of
-plays
+Creating graphs of plays
 
 ``` r
 graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
@@ -103,9 +100,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 3.7512023.
-Average path length deviation must be in the interval \[0.8726735;
-1.1563393\].
+Clustering coefficient deviation must be greater or equal to 3.7645608.
+Average path length deviation must be in the interval \[0.8602492;
+1.1655232\].
 
 Applying criteria
 
@@ -138,8 +135,7 @@ distribution <- lapply(distribution, num_type)
 ```
 
 Fitting logarithms of distributions to linear regression and calculating
-of R² (coefficient of determination) for each model
-(play).
+of R² (coefficient of determination) for each model (play).
 
 ``` r
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
@@ -157,18 +153,15 @@ kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 
 |     | name                                                | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
 | --- | :-------------------------------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
-| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.475338 | 0.9272360 | 0.0727248 |
-| 50  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 6.710217 | 1.1122706 | 0.1711228 |
-| 87  | gleich-der-eheteufel-auf-reisen                     | 1821 |            51 | 0.6291301 | 2.102842 | 4.642326 | 0.9481004 | 0.2813269 |
-| 99  | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.650089 | 0.9437318 | 0.0073215 |
-| 101 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 5.287992 | 1.0060611 | 0.3357111 |
-| 116 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.954625 | 0.9665765 | 0.0215549 |
-| 202 | immermann-andreas-hofer                             | 1835 |            57 | 0.4882979 | 2.327057 | 4.020736 | 1.0236823 | 0.1562356 |
-| 242 | lassalle-franz-von-sickingen                        | 1859 |            72 | 0.5580662 | 2.515649 | 4.596229 | 1.1518624 | 0.2478197 |
-| 322 | raimund-die-unheilbringende-zauberkrone             | 1829 |            56 | 0.5918043 | 2.372727 | 3.824657 | 1.1477477 | 0.2491547 |
-| 393 | soden-doktor-faust                                  | 1797 |            62 | 0.5741016 | 1.873612 | 3.794598 | 0.9120821 | 0.1925088 |
-| 395 | sorge-der-sieg-des-christos                         | 1924 |            79 | 0.8317064 | 1.886076 | 5.219582 | 0.9641030 | 0.0198135 |
-| 419 | vischer-faust                                       | 1862 |            94 | 0.5978947 | 1.972317 | 3.991173 | 1.0096503 | 0.3172817 |
+| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.474163 | 0.9273355 | 0.0727248 |
+| 24  | beer-struensee                                      | 1828 |            57 | 0.6716162 | 2.646707 | 5.504759 | 1.1639195 | 0.3413103 |
+| 51  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 6.742661 | 1.1124970 | 0.1711228 |
+| 100 | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.653641 | 0.9437289 | 0.0073215 |
+| 102 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 5.244529 | 1.0058812 | 0.3357111 |
+| 117 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.928280 | 0.9667081 | 0.0215549 |
+| 218 | kleist-die-hermannsschlacht                         | 1808 |            84 | 0.5906385 | 2.583477 | 5.393360 | 1.1628687 | 0.2373926 |
+| 394 | soden-doktor-faust                                  | 1797 |            62 | 0.5741016 | 1.873612 | 3.777123 | 0.9118637 | 0.1925088 |
+| 415 | tieck-prinz-zerbino                                 | 1799 |           125 | 0.7343698 | 2.361032 | 6.170786 | 1.1625222 | 0.0798542 |
 
 ## Plots
 
