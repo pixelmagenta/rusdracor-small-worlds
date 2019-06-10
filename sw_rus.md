@@ -1,7 +1,7 @@
 Small worlds in Russian drama corpus
 ================
 Ustinova Eugenia
-December 15, 2018
+June 10, 2019
 
 ## Preprocessing
 
@@ -11,8 +11,7 @@ Choice of the corpus
 corpusname <- "rus"
 ```
 
-Downloading CSV files of
-plays
+Downloading CSV files of plays
 
 ``` r
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
@@ -32,8 +31,7 @@ del_vars <- function(play){
 plays <- mclapply(plays, del_vars)
 ```
 
-Downloading
-metadata
+Downloading metadata
 
 ``` r
 metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/metadata.csv"),
@@ -41,8 +39,7 @@ metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/met
 metadata <- metadata[order(metadata$name),]
 ```
 
-Creating graphs of
-plays
+Creating graphs of plays
 
 ``` r
 graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
@@ -103,9 +100,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 4.3514145.
-Average path length deviation must be in the interval \[0.844939;
-1.1641307\].
+Clustering coefficient deviation must be greater or equal to 4.1396986.
+Average path length deviation must be in the interval \[0.8519966;
+1.1585031\].
 
 Applying criteria
 
@@ -138,8 +135,7 @@ distribution <- lapply(distribution, num_type)
 ```
 
 Fitting logarithms of distributions to linear regression and calculating
-of R² (coefficient of determination) for each model
-(play).
+of R² (coefficient of determination) for each model (play).
 
 ``` r
 fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
@@ -155,10 +151,11 @@ small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, 
 kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 ```
 
-|     | name                          | year | numOfSpeakers |        CC |      APL |  CC\_dev | APL\_dev |     Rsqrd |
-| --- | :---------------------------- | ---: | ------------: | --------: | -------: | -------: | -------: | --------: |
-| 82  | mayakovsky-klop               | 1929 |            98 | 0.8423069 | 1.826874 | 5.116228 | 0.964792 | 0.0634534 |
-| 127 | tolstoy-smert-ioanna-groznogo | 1866 |            70 | 0.6382685 | 2.175966 | 4.665023 | 1.037319 | 0.2885855 |
+|     | name                          | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
+| --- | :---------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
+| 88  | mayakovsky-klop               | 1929 |            98 | 0.8423069 | 1.826874 | 5.122094 | 0.9649922 | 0.0634534 |
+| 148 | tolstoy-smert-ioanna-groznogo | 1866 |            70 | 0.6382685 | 2.175966 | 4.680208 | 1.0375684 | 0.2885855 |
+| 149 | tolstoy-tsar-boris            | 1870 |           102 | 0.8730584 | 1.971399 | 4.254078 | 1.0923964 | 0.0171684 |
 
 ## Plots
 

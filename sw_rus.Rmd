@@ -2,7 +2,7 @@
 title: "Small worlds in Russian drama corpus"
 author: "Ustinova Eugenia"
 header-includes: \usepackage[T2A]{fontenc} \usepackage[utf8]{inputenc}
-date: "December 15, 2018"
+date: "June 10, 2019"
 output: github_document
 ---
 
