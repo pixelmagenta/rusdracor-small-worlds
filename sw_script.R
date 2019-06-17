@@ -150,4 +150,18 @@ power_law_plot <- function(name_of_play){
     labs(x="Node degree", y = "Number of nodes")
 }
 
-power_law_plot("goethe-goetz-von-berlichingen-mit-der-eisernen-hand")
+power_law_plot("ostrovsky-snegurochka")
+
+
+some_law_plot <- function(name_of_play){
+  id <- which(name_of_play == df$name)[[1]]
+  loglog <- lm((distribution[[id]]$Num_of_nodes) ~ poly(distribution[[id]]$Node_degree, 2))
+  loglog_df <- data.frame(x = distribution[[id]]$Node_degree, y = fitted(loglog))
+  
+  ggplot(data = distribution[[id]], aes(x = Node_degree, y = Num_of_nodes))+ 
+    geom_point(size = 3) + 
+    geom_line(data = loglog_df, aes(x = x, y = y), linetype = 2, color="blue", size = 1)+
+    labs(x="Node degree", y = "Number of nodes")
+}
+
+some_law_plot("bulgakov-dni-turbinyh")
