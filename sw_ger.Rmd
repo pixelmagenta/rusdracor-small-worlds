@@ -31,7 +31,7 @@ corpusname <- "ger"
 Downloading CSV files of plays
 ```{r}
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
-sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
+sorted_ids <- list_of_names$dramas$name[sort.list(list_of_names$dramas$name)]
 plays <- lapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", 
                   corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 ```
@@ -65,7 +65,7 @@ Calculations of clustering coefficient (CC) and average path length (APL)
 CC <- sapply(graphs_of_plays, transitivity)
 APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
 
-df <- subset(metadata, select = c(name, year, numOfSpeakers) )
+df <- subset(metadata, select = c(name, yearNormalized, numOfSpeakers) )
 df$CC = CC
 df$APL = APL
 ```
@@ -155,7 +155,7 @@ kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 The distribution of plays in the axes of the year of creation and clustering coefficient deviation.
 ```{r}
 theme_set(theme_gray(base_size = 15)) ## size of axis font
-plot1 <- ggplot(na.omit(df), aes(x = year, y = CC_dev, 
+plot1 <- ggplot(na.omit(df), aes(x = yearNormalized, y = CC_dev, 
                                  fill = crit_1, shape = crit_2, color = crit_1))+
   geom_point(size = 6)+
   scale_shape_manual(values=c(21, 22), name = "Criterion 2")+

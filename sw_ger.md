@@ -15,7 +15,7 @@ Downloading CSV files of plays
 
 ``` r
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
-sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
+sorted_ids <- list_of_names$dramas$name[sort.list(list_of_names$dramas$name)]
 plays <- lapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", 
                   corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 ```
@@ -54,7 +54,7 @@ Calculations of clustering coefficient (CC) and average path length
 CC <- sapply(graphs_of_plays, transitivity)
 APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
 
-df <- subset(metadata, select = c(name, year, numOfSpeakers) )
+df <- subset(metadata, select = c(name, yearNormalized, numOfSpeakers) )
 df$CC = CC
 df$APL = APL
 ```
@@ -100,9 +100,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 3.7645608.
-Average path length deviation must be in the interval \[0.8602492;
-1.1655232\].
+Clustering coefficient deviation must be greater or equal to 3.7642457.
+Average path length deviation must be in the interval \[0.8604433;
+1.1651555\].
 
 Applying criteria
 
@@ -151,17 +151,17 @@ small_worlds <- na.omit(df[df$crit_2 == TRUE,])
 kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 ```
 
-|     | name                                                | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
-| --- | :-------------------------------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
-| 14  | avenarius-faust                                     | 1919 |            95 | 0.6631684 | 1.815314 | 4.474163 | 0.9273355 | 0.0727248 |
-| 24  | beer-struensee                                      | 1828 |            57 | 0.6716162 | 2.646707 | 5.504759 | 1.1639195 | 0.3413103 |
-| 51  | buechner-dantons-tod                                | 1835 |           103 | 0.6838322 | 2.460857 | 6.742661 | 1.1124970 | 0.1711228 |
-| 100 | goethe-faust-eine-tragoedie                         | 1808 |           115 | 0.9390353 | 1.703252 | 4.653641 | 0.9437289 | 0.0073215 |
-| 102 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand | 1773 |            79 | 0.4540090 | 2.485077 | 5.244529 | 1.0058812 | 0.3357111 |
-| 117 | grabbe-hannibal                                     | 1835 |           118 | 0.8030429 | 2.189493 | 8.928280 | 0.9667081 | 0.0215549 |
-| 218 | kleist-die-hermannsschlacht                         | 1808 |            84 | 0.5906385 | 2.583477 | 5.393360 | 1.1628687 | 0.2373926 |
-| 394 | soden-doktor-faust                                  | 1797 |            62 | 0.5741016 | 1.873612 | 3.777123 | 0.9118637 | 0.1925088 |
-| 415 | tieck-prinz-zerbino                                 | 1799 |           125 | 0.7343698 | 2.361032 | 6.170786 | 1.1625222 | 0.0798542 |
+|     | name                                                | yearNormalized | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
+| --- | :-------------------------------------------------- | -------------: | ------------: | --------: | -------: | -------: | --------: | --------: |
+| 14  | avenarius-faust                                     |           1919 |            95 | 0.6631684 | 1.815314 | 4.474163 | 0.9273355 | 0.0727248 |
+| 24  | beer-struensee                                      |           1828 |            57 | 0.6716162 | 2.646707 | 5.504759 | 1.1639195 | 0.3413103 |
+| 52  | buechner-dantons-tod                                |           1835 |           103 | 0.6838322 | 2.460857 | 6.752988 | 1.1122864 | 0.1711228 |
+| 102 | goethe-faust-eine-tragoedie                         |           1808 |           115 | 0.9390353 | 1.703252 | 4.647057 | 0.9437194 | 0.0073215 |
+| 104 | goethe-goetz-von-berlichingen-mit-der-eisernen-hand |           1773 |            79 | 0.4540090 | 2.485077 | 5.245712 | 1.0059473 | 0.3357111 |
+| 119 | grabbe-hannibal                                     |           1835 |           118 | 0.8030429 | 2.189493 | 8.931664 | 0.9667222 | 0.0215549 |
+| 220 | kleist-die-hermannsschlacht                         |           1808 |            84 | 0.5906385 | 2.583477 | 5.409039 | 1.1632069 | 0.2373926 |
+| 396 | soden-doktor-faust                                  |           1797 |            62 | 0.5741016 | 1.873612 | 3.789511 | 0.9122272 | 0.1925088 |
+| 417 | tieck-prinz-zerbino                                 |           1799 |           125 | 0.7343698 | 2.361032 | 6.160060 | 1.1626334 | 0.0798542 |
 
 ## Plots
 
@@ -170,7 +170,7 @@ clustering coefficient deviation.
 
 ``` r
 theme_set(theme_gray(base_size = 15)) ## size of axis font
-plot1 <- ggplot(na.omit(df), aes(x = year, y = CC_dev, 
+plot1 <- ggplot(na.omit(df), aes(x = yearNormalized, y = CC_dev, 
                                  fill = crit_1, shape = crit_2, color = crit_1))+
   geom_point(size = 6)+
   scale_shape_manual(values=c(21, 22), name = "Criterion 2")+

@@ -15,7 +15,7 @@ Downloading CSV files of plays
 
 ``` r
 list_of_names <- fromJSON(paste0("https://dracor.org/api/corpora/", corpusname))
-sorted_ids <- list_of_names$dramas$id[sort.list(list_of_names$dramas$id)]
+sorted_ids <- list_of_names$dramas$name[sort.list(list_of_names$dramas$name)]
 plays <- lapply(sorted_ids, function(x) read.csv(paste0("https://dracor.org/api/corpora/", 
                   corpusname, "/play/", x, "/networkdata/csv"), stringsAsFactors = F))
 ```
@@ -54,7 +54,7 @@ Calculations of clustering coefficient (CC) and average path length
 CC <- sapply(graphs_of_plays, transitivity)
 APL <- sapply(graphs_of_plays, function(x) mean_distance(x, directed=F))
 
-df <- subset(metadata, select = c(name, year, numOfSpeakers) )
+df <- subset(metadata, select = c(name, yearNormalized, numOfSpeakers) )
 df$CC = CC
 df$APL = APL
 ```
@@ -100,9 +100,9 @@ APL_border_min <- mean(df$APL_dev, na.rm = TRUE)-2*sd(df$APL_dev, na.rm = TRUE)
 APL_border_max <- mean(df$APL_dev, na.rm = TRUE)+2*sd(df$APL_dev, na.rm = TRUE)
 ```
 
-Clustering coefficient deviation must be greater or equal to 4.1396986.
-Average path length deviation must be in the interval \[0.8519966;
-1.1585031\].
+Clustering coefficient deviation must be greater or equal to 3.8607863.
+Average path length deviation must be in the interval \[0.865611;
+1.1517134\].
 
 Applying criteria
 
@@ -151,11 +151,12 @@ small_worlds_out <- subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, 
 kable(subset(small_worlds, select = c(-crit_1, -crit_2, -CC_rand, -APL_rand)))
 ```
 
-|     | name                          | year | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
-| --- | :---------------------------- | ---: | ------------: | --------: | -------: | -------: | --------: | --------: |
-| 88  | mayakovsky-klop               | 1929 |            98 | 0.8423069 | 1.826874 | 5.122094 | 0.9649922 | 0.0634534 |
-| 148 | tolstoy-smert-ioanna-groznogo | 1866 |            70 | 0.6382685 | 2.175966 | 4.680208 | 1.0375684 | 0.2885855 |
-| 149 | tolstoy-tsar-boris            | 1870 |           102 | 0.8730584 | 1.971399 | 4.254078 | 1.0923964 | 0.0171684 |
+|     | name                          | yearNormalized | numOfSpeakers |        CC |      APL |  CC\_dev |  APL\_dev |     Rsqrd |
+| --- | :---------------------------- | -------------: | ------------: | --------: | -------: | -------: | --------: | --------: |
+| 19  | bulgakov-vojna-i-mir          |           1932 |            95 | 0.5702378 | 2.320045 | 5.216627 | 1.0654268 | 0.4350761 |
+| 103 | mayakovsky-klop               |           1929 |            98 | 0.8423069 | 1.826874 | 5.113551 | 0.9648744 | 0.0634534 |
+| 195 | tolstoy-smert-ioanna-groznogo |           1866 |            70 | 0.6382685 | 2.175966 | 4.661746 | 1.0375206 | 0.2885855 |
+| 196 | tolstoy-tsar-boris            |           1870 |           102 | 0.8730584 | 1.971399 | 4.252755 | 1.0923500 | 0.0171684 |
 
 ## Plots
 
@@ -164,7 +165,7 @@ clustering coefficient deviation.
 
 ``` r
 theme_set(theme_gray(base_size = 15)) ## size of axis font
-plot1 <- ggplot(na.omit(df), aes(x = year, y = CC_dev, 
+plot1 <- ggplot(na.omit(df), aes(x = yearNormalized, y = CC_dev, 
                                  fill = crit_1, shape = crit_2, color = crit_1))+
   geom_point(size = 6)+
   scale_shape_manual(values=c(21, 22), name = "Criterion 2")+
